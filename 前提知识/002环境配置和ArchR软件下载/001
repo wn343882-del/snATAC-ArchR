@@ -1,1 +1,19 @@
+###调用ATAC_Rice项目的基本流程句子，可以切换任意目录。
+setwd("D:/BGI_ning/1_project/4_rice_photosynthetic_noon_break/")
+# 验证是否在正确目录
+getwd()
+# 应该显示: [1] "D:/BGI_ning/1_project/4_rice_photosynthetic_noon_break"
+# 加载renv包
+library(renv)
 
+# 4.1 确认在正确目录后，手动source
+source("renv/activate.R")
+
+# 4.2 检查是否激活
+.libPaths()
+# 应该显示项目路径
+
+# 4.3 如果成功，说明.Rprofile可能没自动执行
+# 检查.Rprofile内容
+readLines(".Rprofile")
+# 应该显示: source("renv/activate.R")
