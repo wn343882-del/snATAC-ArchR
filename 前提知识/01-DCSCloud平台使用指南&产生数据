@@ -6,7 +6,34 @@
 chr1    10500    10620    AAACCTGAGT    1
 chr1    11000    11150    AAACCTGAGT    1
 chr2    50000    50100    TTGGAACCTA    1
-2
+我们BGI数据如下：chr5-染色体；19开始，75结束；细胞barcode;支持该片段的 unique read 数
+> readLines(gzfile(frag_file), n = 5)
+[1] "Chr5\t19\t75\tCELL828932_N1\t1" 
+[2] "Chr5\t20\t69\tCELL980739_N1\t1" 
+[3] "Chr5\t20\t69\tCELL4332_N2\t1"
+2##############################################################################################################
+获得fragments数据后，按需求构建基因组（以水稻为例，采用日本晴的基因组及gtf文件），注意，fa和gtf的名称要一致
+> print(seqnames(fa_idx))
+factor-Rle of length 32 with 32 runs
+  Lengths:           1           1           1           1           1 ...           1           1           1           1           1
+  Values : Chr5        Chr3        Chr2        Chr11       Chr1        ... Contig37END chrM        Contig2END  chrC        Contig43END
+Levels(32): Chr5 Chr3 Chr2 Chr11 Chr1 Chr9 Chr10 Chr7 ... Contig13END Contig19END Contig37END chrM Contig2END chrC Contig43END
+> # 2.4 检查gtf文件的染色体名称
+> gtf_data <- rtracklayer::import(gtf_file)
+> message("gtf中的染色体名称:")
+gtf中的染色体名称:
+> print(unique(seqnames(gtf_data))[1:10])  # 前10个
+ [1] chrM        Contig71END Chr2        Chr12       Chr1        Chr4        Chr10       Chr3        Chr11       Chr7       
+Levels: chrC chrM Chr1 Chr10 Chr11 Chr12 Chr2 Chr3 Chr4 Chr5 Chr6 Chr7 Chr8 Chr9 Contig71END
+像这种不一致情况下，在创建基因组注释前，需要确保一致性；这里存在的contig:Contig 染色体通常是辅助的：这些 Contig（重叠群）通常代表基因组中未完全组装的区域，对核心的染色质可及性分析影响不大。
+question
+ArchR 为了高效地访问基因组序列（例如获取 GC 含量、序列信息等），需要依赖 BSgenome 包提供的标准接口。直接给一个 .fa 文件路径，ArchR 并不知道如何调用它
+首先：要安装BSgenomeForge做注释基因组的标准接口。太难了
+##############################################################################################################################################################
+
+
+
+#####################################################################################################
 有了fragments表格后，可以利用其创建Arrow文件（也是 ArchR 中用于存储单个样本数据的基本单位）
 文件基本格式如下，3个层次（Metadata-元数据、Accessible fragments可访问的片段、Data Matrics数据矩阵）
 创建Arrow Files，这个步骤会对每一个样本做以下处理：读取accessible fragments；计算质控指标 (i.e. TSS enrichment scores and nucleosome info)；过滤细胞；使用500-bp bins窗口创建genome-wide TileMatrix；创建GeneScoreMatrix。
