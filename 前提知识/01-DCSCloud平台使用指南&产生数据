@@ -1,1 +1,7 @@
 数据下机后获得fq.gz文件，因为双端测序，会有两个fq.gz文件配对，解读Report文件细节。注意以下几个指标
+这一步骤主要目的是获得可分析的fragment文件，“实验角度，fragments是Tn5酶转座后产生的片段（fragment），测序是从双端进行测序，生成2个fq.gz文件后，再进行基因组比对合并为BAM文件，根据成对 reads 推断 fragment 区间，合并，一个文库有一个完整的fragment.tsv.gz文件”
+"分析角度：fragments指的是一个表格（包含 chr、start、end、barcode）（也就是基因组范围对象，其中包含每个测序片段对应的染色体、经过偏移调整的单碱基染色体起始位置、经过偏移调整的单碱基染色体终止位置以及唯一的细胞条形码ID，这里行对应什么？列对应什么呢）--from生信技能树（参考文献https://pmc.ncbi.nlm.nih.gov/articles/PMC3959825/）
+常见fragments格式如下（行是一个真实测到的 DNA 片段，列为各个列名）一个完整的 fragment 是由“两次 Tn5 插入”界定出来的。
+chr1    10500    10620    AAACCTGAGT    1
+chr1    11000    11150    AAACCTGAGT    1
+chr2    50000    50100    TTGGAACCTA    1
