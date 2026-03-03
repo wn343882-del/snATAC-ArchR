@@ -1,0 +1,89 @@
+###为了方便R版本里包的兼容性调用，使用renv包，在特定目录下建立自己的下载路径，具体实现方法如下
+#注意⚠️renv 理解为 R 语言的专用虚拟环境，而 conda 是 Python 社区的通用虚拟环境工具，同时也支持 R。
+####设定特定目录，在此目录下新建R_project，在该特定project下去下载包，分析数据
+setwd("D:/BGI_ning/1_project/4_rice_photosynthetic_noon_break/")
+# 验证是否在正确目录
+getwd()
+# 应该显示: [1] "D:/BGI_ning/1_project/4_rice_photosynthetic_noon_break"
+# 加载renv包（提前安装在主下载路径下安装）
+library(renv)
+
+# 4.1 确认在正确目录后，手动source
+source("renv/activate.R")
+
+# 4.2 检查是否激活
+.libPaths()
+# 应该显示项目路径
+
+# 4.3 如果成功，说明.Rprofile可能没自动执行
+# 检查.Rprofile内容
+readLines(".Rprofile")
+# 应该显示: source("renv/activate.R")
+
+
+####2成功后在该目录下下载ArchR,在此之前，下载各类依赖包，确定包下载到自己的renv路径下，方便使用查找
+#ArchR的安装需要很多相关的依赖（Githubr认证以及Bioconductor依赖缺失）
+## 1.1 安装usethis（用于方便地编辑配置文件）
+install.packages("usethis")
+# 1.2 安装gitcreds（用于安全存储GitHub凭证）
+install.packages("gitcreds")
+# 1.3 安装devtools（用于从GitHub安装包）
+install.packages("devtools")
+# 1.4 安装BiocManager（用于管理Bioconductor包）
+install.packages("BiocManager")
+# 2.1 加载usethis
+library(usethis)
+
+# 2.2 打开.Renviron文件查看是否有旧的GITHUB_PAT设置
+edit_r_environ()
+# 这会打开一个文件，如果里面有任何包含 GITHUB_PAT 或 GITHUB_TOKEN 的行，请删除它们
+# 保存文件并关闭
+# 2.3 重启R会话使改动生效
+# Session -> Restart R
+# 3.1 重新加载必要的包
+library(usethis)
+library(gitcreds)
+
+# 3.2 生成GitHub PAT（会自动打开浏览器）
+create_github_token()
+
+# 在打开的GitHub页面中：
+# - Note: 输入 "rice-ATAC-project"（或其他你记得的名字）
+# - Expiration: 可以选择30天或"No expiration"
+# - Scopes: 保持默认选中的即可
+# - 点击底部的 "Generate token" 按钮
+# - **复制生成的令牌**（一串以ghp_开头的字符）
+# 4.1 将PAT存储到Git凭证管理器
+gitcreds_set()
+##########如果失败，下载git软件#############################
+# 验证Git是否可用
+system("git --version")
+# 如果能显示版本号（如 git version 2.42.0.windows.1），就成功了！
+
+#gitcreds_set()
+# 运行后会提示：
+# ? Enter password or token: 
+# 在这里粘贴你刚才复制的PAT，然后按回车
+
+# 4.2 验证PAT是否成功设置
+gh_token_help()
+# 应该显示你的令牌信息，没有错误
+# 5.1 先安装Bioconductor核心包
+library(BiocManager)
+install(c("BiocGenerics", "GenomicRanges", "IRanges", 
+          "S4Vectors", "SummarizedExperiment"))
+
+# 5.2 验证安装
+library(BiocGenerics)
+packageVersion("BiocGenerics")  # 应该显示版本号
+
+# 6.1 使用devtools从GitHub安装ArchR
+library(devtools)
+install_github("GreenleafLab/ArchR", 
+               ref = "master", 
+               repos = BiocManager::repositories())
+#######################之后可以下载ArchR包了##############################################
+#前提：ArchR包非常复杂，需要分阶段安装且时间长，在第一阶段安装过程中可能缺失一些依赖的相关包，在后续过程中手动安装，
+#
+
+
