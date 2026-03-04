@@ -1,0 +1,2 @@
+例如，我要下载GenomicFeatures，尝试在BiocManager::install("GenomicFeatures")x下载，但是镜像不同步； Windows + R 4.3 + Bioconductor 3.18 + renv 环境下
+#镜像不同步 + 手动下载的话依赖链过长（biomaRt → httr → openssl → curl → …）
