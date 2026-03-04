@@ -28,7 +28,10 @@ Levels: chrC chrM Chr1 Chr10 Chr11 Chr12 Chr2 Chr3 Chr4 Chr5 Chr6 Chr7 Chr8 Chr9
 像这种不一致情况下，在创建基因组注释前，需要确保一致性；这里存在的contig:Contig 染色体通常是辅助的：这些 Contig（重叠群）通常代表基因组中未完全组装的区域，对核心的染色质可及性分析影响不大。
 question
 ArchR 为了高效地访问基因组序列（例如获取 GC 含量、序列信息等），需要依赖 BSgenome 包提供的标准接口。直接给一个 .fa 文件路径，ArchR 并不知道如何调用它
-首先：要安装BSgenomeForge做注释基因组的标准接口。太难了
+首先：要安装BSgenomeForge做注释基因组的标准接口。我们绕过fa，直接在BSgenome库里找到了水稻日本晴的参考基因组注释BSgenome.Osativa.MSU.MSU7，但是
+BSgenome只包含染色体序列，染色体长度，GC计算支持，序列访问接口，但是不包含gtf提供的系基因结构信息，（“gene exon TSS promoter等）；但是ArchR需要两个维度信息，一个是genomeAnnotation，一个是genennotation（基因结构，TSS&gene body&exon)，
+此处经常报错原因：ArchR的函数接口不匹配，所需要的命令也就不一样（是 TxDb 方式&还是 GRanges 方式&还是 genome + OrgDb 方式）；args(createGeneAnnotation)发现我的ArchR是新版本，所以我要用 GTF → 构建 TxDb → 再给 ArchR
+
 ##############################################################################################################################################################
 
 
