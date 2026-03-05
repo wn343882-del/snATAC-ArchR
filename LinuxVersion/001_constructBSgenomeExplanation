@@ -1,0 +1,4 @@
+step1 download proper fasta and gtf files
+step2 login linux login page, use "conda env list" to choose a correct one environment
+step3 turn fa file into twoBit file format  
+步骤 3：将 fa 文件转换为 twoBit 文件格式
