@@ -1,0 +1,7 @@
+
+前提知识了解什么是Blacklist.bed,本质上是一个 ATAC-seq / ChIP-seq 常用的 “blacklist（黑名单区域）” 文件，基因组里需要排除的区域,这里以拟南芥的文件为例/jdfsbjcas1/ST_BJ/P21Z28400N0234/yangjing7/00.ref/Arabidopsis/Araport11/snATAC_ref.ArchR/BlackList_TAIR10.bed
+区域特点：异常高的信号区域--非真实开放性染色质，重复序列区域，mapping不可靠的区域，测序/比对artefact; 如果不去掉的话，ATAC-seq会假阳性，peak enrichment被严重干扰，motif分析会出错。
+一般格式：bed格式，常见最常见的是 BED3、BED4、BED6   head BlackList_TAIR10.bed，（拟南芥这个列分别是染色体，start end 区域名称 评分 链方向），一般只用前三列，写6列是为了兼容各个不同版本的软件。
+Chr1	4598255	4599790	.	0	.
+Chr1	14195657	14197192	.	0	.
+Chr1	14362569	14364104	.	0	.
