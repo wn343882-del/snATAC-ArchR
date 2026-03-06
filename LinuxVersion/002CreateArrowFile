@@ -5,3 +5,20 @@
 Chr1	4598255	4599790	.	0	.
 Chr1	14195657	14197192	.	0	.
 Chr1	14362569	14364104	.	0	.
+
+####创建Arrrow文件需要geneAnnotation(from gtf),genomeAnnotation(from BSgenome)，Fragments文件；三者染色体名称，染色体长度均要保持一致
+``` R
+arrowFiles <- createArrowFiles(
+  inputFiles = "/jdfsbjcas1/ST_BJ/P21Z28400N0234/wangning12/1_project/3_2509riceLunchBreak/ATAC/data/A251113004/fragments_trimmed.tsv.gz",
+  sampleNames = "A251113004",
+  minTSS = 1,
+  minFrags = 1000,
+  excludeChr = c("Mt", "Pt"),
+  addTileMat = TRUE,
+  addGeneScoreMat = TRUE,
+  subThreading = FALSE,   # 改回FALSE
+  geneAnnotation = geneAnnotation,
+  genomeAnnotation = genomeAnnotation
+)
+```
+
