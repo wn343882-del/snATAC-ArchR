@@ -1,0 +1,92 @@
+#  ====================================================================================
+#MSU v7 里gff3问题，导致构建参考基因组里TSS.bed&promoter.bed文件为空，进而导致运行snATAC-seq失败
+#解决方法
+# 查看GTF文件的基本信息
+ls -lh /jdfsbjcas1/ST_BJ/P21Z28400N0234/wangning12/1_project/3_2509riceLunchBreak/ATAC/genome/00Genome/MSU_v7/MSUv7_2021_all.gtf
+# 统计基因数量
+grep -v "^#" /jdfsbjcas1/ST_BJ/P21Z28400N0234/wangning12/1_project/3_2509riceLunchBreak/ATAC/genome/00Genome/MSU_v7/MSUv7_2021_all.gtf | grep -c $'\tgene\t'
+# 查看基因的格式示例
+grep -v "^#" /jdfsbjcas1/ST_BJ/P21Z28400N0234/wangning12/1_project/3_2509riceLunchBreak/ATAC/genome/00Genome/MSU_v7/MSUv7_2021_all.gtf | grep $'\tgene\t' | head -3
+mkdir -p /jdfsbjcas1/ST_BJ/P21Z28400N0234/wangning12/1_project/3_2509riceLunchBreak/ATAC/genome/00Genome/MSU_v7/temp
+cd /jdfsbjcas1/ST_BJ/P21Z28400N0234/wangning12/1_project/3_2509riceLunchBreak/ATAC/genome/00Genome/MSU_v7
+# 提取所有基因的TSS位置
+grep -v "^#" MSUv7_2021_all.gtf | \
+awk '$3=="gene" {
+    # 提取gene_id
+    match($0, /ID "([^"]+)"/, id);
+    gene_id = id[1];
+    
+    # 根据链确定TSS位置
+    if($7=="+") {
+        # 正链：TSS在起始位置
+        print $1"\t"$4-1"\t"$4"\t"gene_id"\t0\t+";
+    } else {
+        # 负链：TSS在结束位置
+        print $1"\t"$5-1"\t"$5"\t"gene_id"\t0\t-";
+    }
+}' > tss.bed
+# 查看文件行数（应该等于基因数55,986）
+echo "TSS文件行数:"
+wc -l tss.bed
+
+# 查看前10行
+echo -e "\n前10行:"
+head -10 tss.bed
+
+# 查看染色体分布
+echo -e "\n染色体分布:"
+cut -f1 tss.bed | sort | uniq -c | head -15
+
+# 查看链的分布
+echo -e "\n正负链分布:"
+cut -f6 tss.bed | sort | uniq -c
+
+# 查看是否有空行或格式错误
+echo -e "\n检查空行:"
+awk 'NF==0' tss.bed | wc -l
+
+# 验证BED格式是否正确（6列）
+echo "列数检查:"
+awk '{print NF}' tss.bed | sort -u
+
+# 验证坐标是否合理（start < end）
+echo -e "\n坐标合理性检查（应该有0行）:"
+awk '$2 >= $3' tss.bed | wc -l
+
+# 验证染色体名是否与预期一致
+echo -e "\n染色体名列表:"
+cut -f1 tss.bed | sort -u
+# =============================================================================
+# 生成promotor文件的
+# 确保在正确的目录
+cd /jdfsbjcas1/ST_BJ/P21Z28400N0234/wangning12/1_project/3_2509riceLunchBreak/ATAC/genome/00Genome/MSU_v7
+
+# 从TSS文件生成promoter文件（TSS上下游2000bp）
+awk '{
+    if($6=="+") {
+        # 正链：promoter在TSS上游2000bp到下游500bp
+        start = $2 - 2000;
+        end = $2 + 500;
+    } else {
+        # 负链：promoter在TSS下游500bp到上游2000bp
+        start = $3 - 500;
+        end = $3 + 2000;
+    }
+    # 确保坐标不小于1
+    if(start < 1) start = 1;
+    print $1"\t"start"\t"end"\t"$4
+}' tss.bed > promoter.bed
+
+
+echo "========== promoter文件验证 =========="
+echo "总行数: $(wc -l < promoter.bed) (应等于55986)"
+echo ""
+echo "前5行:"
+head -5 promoter.bed
+echo ""
+echo "染色体分布:"
+cut -f1 promoter.bed | sort | uniq -c
+echo ""
+echo "坐标合理性检查（检查start<end）:"
+awk '$2 >= $3' promoter.bed | wc -l
+echo "======================================"
